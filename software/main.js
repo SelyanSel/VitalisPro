@@ -8,6 +8,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const fs = require("node:fs")
+const path = require("node:path")
 const env = require('dotenv')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
@@ -149,9 +150,11 @@ let userDB = [
         visits: [],
         password: "",
         tagSignature: "",
-        isInside:false
+        isInside: false,
+        privileges: [0]
     }
 ]
+// privileges : 0 = user, 1 = salle manager, 2 = admin
 userDB = []
 userDB = JSON.parse(fileManager.readFileContent("./data/db/user.json"))
 
@@ -217,14 +220,18 @@ function verifyToken(token) {
 }
 
 async function hashPassword(password) {
-  const saltRounds = process.env.SALT
-  const hashedPassword = await bcrypt.hash(password, Number.parseInt(saltRounds))
-  return hashedPassword
+    const saltRounds = process.env.SALT
+    const hashedPassword = await bcrypt.hash(password, Number.parseInt(saltRounds))
+    return hashedPassword
 }
 
 async function verifyPassword(password, hashedPassword) {
-  const isValid = await bcrypt.compare(password, hashedPassword)
-  return isValid
+    const isValid = await bcrypt.compare(password, hashedPassword)
+    return isValid
+}
+
+function parseJwt(token) {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
 
 parser.on('data', (data) => {
@@ -316,50 +323,50 @@ app.get('/test', (req, res) => {
 // socket
 
 io.on('connection', (socket) => {
-    socket.on("AUTH_REQ", (data)=>{
+    socket.on("AUTH_REQ", (data) => {
         try {
             console.log(data)
-            if (data.token){
+            if (data.token) {
                 let valid = verifyToken(data.token)
                 console.log(valid)
-                if (valid){
-                    socket.emit("AUTH_RES", {valid:true})
-                }else{
-                    socket.emit("AUTH_RES", {valid:false})
+                if (valid) {
+                    socket.emit("AUTH_RES", { valid: true })
+                } else {
+                    socket.emit("AUTH_RES", { valid: false })
                 }
             }
         } catch (error) {
-            socket.emit("AUTH_RES", {valid:false})
+            socket.emit("AUTH_RES", { valid: false })
             console.log(error)
         }
     })
-    socket.on("LOGIN_REQ", async (data)=>{
+    socket.on("LOGIN_REQ", async (data) => {
         try {
             let user;
             console.log(data)
             userDB.forEach(usr => {
-                if (usr.email == data.e){
+                if (usr.email == data.e) {
                     user = usr
                 }
             });
 
-            if (!user.email){
-                socket.emit("LOGIN_RES", {status:false})
+            if (!user.email) {
+                socket.emit("LOGIN_RES", { status: false })
                 return;
             }
 
             let match = await verifyPassword(data.p, user.password)
 
-            if (match){
+            if (match) {
                 let token = makeToken(user)
-                socket.emit("LOGIN_RES", {status:true, token:token})
+                socket.emit("LOGIN_RES", { status: true, token: token })
                 return;
-            }else{
-                socket.emit("LOGIN_RES", {status:false})
+            } else {
+                socket.emit("LOGIN_RES", { status: false })
                 return;
             }
         } catch (error) {
-            socket.emit("LOGIN_RES", {status:false})
+            socket.emit("LOGIN_RES", { status: false })
         }
     })
     socket.on('BADGE_ALLOW', (msg) => {
@@ -386,27 +393,73 @@ io.on('connection', (socket) => {
             return;
         }
 
+        let parseToken = parseJwt(req.token)
+
+        // admin privileges
+
+        if (!parseToken.privileges) {
+            socket.emit("INVALID_PRIVILEGES")
+            return;
+        }
+
+        if (req.type == "preciseLog") {
+            if (parseToken.privileges[0] == 2) {
+                let preciseLog = "Not found."
+                preciseLog = fs.readFileSync(__dirname + "/data/logs/" + req.timestamp + ".log")
+                socket.emit("DATA_CALLBACK", { type: "preciseLog", data: preciseLog.toString() })
+            } else {
+                socket.emit("INVALID_PRIVILEGES")
+            }
+        }
+        if (req.type == "getLogs") {
+            if (parseToken.privileges[0] == 2) {
+                var files = fs.readdirSync(__dirname + "/data/logs");
+                var logFiles = []
+                for (var i = 0; i < files.length; i++) {
+                    var filename = path.join(__dirname + "/data/logs", files[i]);
+                    if (filename.endsWith(".log")) {
+                        logFiles.push(path.basename(filename).replace(".log", ""))
+                    };
+                };
+                console.log(logFiles)
+                socket.emit("DATA_CALLBACK", { type: "logHistory", data: logFiles })
+            } else {
+                socket.emit("INVALID_PRIVILEGES")
+            }
+        }
         if (req.type == "logData") {
-            socket.emit("DATA_CALLBACK", { type: "logData", data: logData })
+            if (parseToken.privileges[0] == 2) {
+                socket.emit("DATA_CALLBACK", { type: "logData", data: logData })
+            } else {
+                socket.emit("INVALID_PRIVILEGES")
+            }
         }
         if (req.type == "lastPing") {
-            socket.emit("DATA_CALLBACK", { type: "lastPing", data: lastPing })
+            if (parseToken.privileges[0] == 2) {
+                socket.emit("DATA_CALLBACK", { type: "lastPing", data: lastPing })
+            } else {
+                socket.emit("INVALID_PRIVILEGES")
+            }
         }
         if (req.type == "stats") {
-            let sub = 0
-            userDB.forEach((user) => {
-                if (user.hasSubscription) {
-                    sub++;
-                }
-            });
-            socket.emit("DATA_CALLBACK", {
-                type: "stats",
-                data: {
-                    subscribed: sub,
-                    users: userDB.length,
-                    entries: statDB.entries
-                }
-            })
+            if (parseToken.privileges[0] == 2) {
+                let sub = 0
+                userDB.forEach((user) => {
+                    if (user.hasSubscription) {
+                        sub++;
+                    }
+                });
+                socket.emit("DATA_CALLBACK", {
+                    type: "stats",
+                    data: {
+                        subscribed: sub,
+                        users: userDB.length,
+                        entries: statDB.entries
+                    }
+                })
+            } else {
+                socket.emit("INVALID_PRIVILEGES")
+            }
         }
     })
     socket.on('INIT_REGISTER', (req) => {
@@ -444,7 +497,9 @@ io.on('connection', (socket) => {
                 email: packet.mail,
                 visits: [],
                 password: "-1",
-                tagSignature: packet.tag
+                tagSignature: packet.tag,
+                isInside: false,
+                privileges: [0]
             }
             userDB.push(newUser)
             fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
@@ -467,7 +522,7 @@ io.on('connection', (socket) => {
     })
 });
 
-async function gen(){
+async function gen() {
     let gent = await hashPassword("seltest")
     console.log(gent)
     return gent;

@@ -19,28 +19,23 @@
         <img class="h-7 w-8 self-center my-2" src="./assets/img/logo.png">
 
         <div class="flex-1 flex flex-col gap-4 justify-center items-center" id="icons">
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './'">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png" ></img>
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './register.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/analyse-qr-small.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './users.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/userlist.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './logs.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/logs.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="logout()">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/exit.png"></img>
             </div>
@@ -50,54 +45,37 @@
     <div id="content"
         class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-5 m-5 rounded-2xl shadow-md border-2 border-stone-50">
 
-        <a class="text-xl font-extrabold" id="pagetitle">Logs (serveur)</a>
+        <div class="flex flex-row gap-2">
+            <a class="text-xl font-extrabold" id="pagetitle">Logs (serveur)</a>
+            <a class="text-xl font-medium" id="date"></a>
+        </div>
 
-        <div class="flex flex-1 flex-row gap-4">
+        <div class="flex flex-1 flex-col gap-4">
 
-            
-            
+            <div class="flex-1 overflow-y-auto mt-4" id="eventLog">
+                <div
+                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mb-4 rounded-2xl shadow-md border-2 border-stone-50">
+                    -- Fin de l'historique -- 
+                </div>
+            </div>
+
+            <div id="txtArea" class="bg-gray-900 text-white flex flex-1 mt-4 rounded-2xl" hidden>
+                <textarea id="logdata" class="flex-1 rounded-2xl resize-none p-4" readonly>t </textarea>
+            </div>
+            <div hidden id="cancelBtn" onclick="navReturn()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                <img class="h-5" src="./assets/img/exit.png">
+                <a class="text-white">Retour</a>
+            </div>
+
         </div>
 
     </div>
 
 </body>
 
-<script>
-    const ctx = document.getElementById('myChart');
-
-    function monthParser(data){
-        let d = new Date();
-        c.data.datasets[0].data[d.getMonth()] = data
-        c.update()
-    }
-
-    let c = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
-            ],
-            datasets: [{
-                label: 'Entrées',
-                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    suggestedMin: 0,
-                    suggestedMax: 10
-                }
-            }
-        }
-    });
-</script>
-
 <script src="/socket.io/socket.io.js"></script>
-<script src="./assets/js/index.js"></script>
+<script src="./assets/js/logs.js"></script>
 <script src="./assets/js/authMan.js"></script>
 
 </html>
