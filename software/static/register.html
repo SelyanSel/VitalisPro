@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis Pro - Espace Membre</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./assets/css/cssfix.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen w-full flex flex-row font-(family-name:--font-nunito) antialiased">
+
+    <div id="nav"
+        class="sticky top-5 h-[calc(100vh-2.5rem)] backdrop-blur-sm bg-white/50 flex flex-col w-20 p-2 ml-5 my-5 rounded-2xl shadow-md justify-center border-2 border-stone-50">
+        <img class="h-7 w-8 self-center my-2" src="./assets/img/logo.png">
+
+        <div class="flex-1 flex flex-col gap-4 justify-center items-center" id="icons">
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+                onclick="window.location = './'">
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png"></img>
+            </div>
+            <div
+                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center">
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/analyse-qr-small.png"></img>
+            </div>
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+                onclick="window.location = './users.html'">
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/userlist.png"></img>
+            </div>
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+                onclick="window.location = './logs.html'">
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/logs.png"></img>
+            </div>
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+                onclick="logout()">
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/exit.png"></img>
+            </div>
+        </div>
+    </div>
+
+    <div id="content"
+        class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-5 m-5 rounded-2xl shadow-md border-2 border-stone-50">
+
+        <a class="text-xl font-extrabold" id="pagetitle">Enregistrer un nouveau badge</a>
+
+        <div class="flex flex-1 flex-row gap-4">
+
+            <div id="bg" class="backdrop-blur-sm bg-yellow-500 flex flex-1 flex-col p-5 m-5 rounded-2xl shadow-md border-2 border-yellow-500 text-white
+                       justify-center items-center gap-4">
+
+                <img class="h-16" id="statusimg" src="./assets/img/loading.png">
+
+                <div class="flex gap-0 flex-col justify-center items-center">
+
+                    <a class="text-xl font-extrabold" id="titletext">En attente...</a>
+                    <a class="text-xl font-medium" id="statustext">En attente...</a>
+
+                    <div id="inputText" class="flex flex-col" hidden>
+                        <label for="email" class="block mb-2.5 text-sm font-medium text-heading text-center">Entrez
+                            l'e-mail utilisateur</label>
+                        <input type="text" id="email" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
+                            placeholder="e-mail..." required />
+                        <div id="btnRegister" onclick="regValidate()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                            <img class="h-5" src="./assets/img/verify.png">
+                            <a>Valider</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+    const ctx = document.getElementById('myChart');
+
+    function monthParser(data) {
+        let d = new Date();
+        c.data.datasets[0].data[d.getMonth()] = data
+        c.update()
+    }
+
+
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="./assets/js/register.js">
+
+</script>
+
+</html>
