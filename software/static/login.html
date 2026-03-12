@@ -14,164 +14,32 @@
 
 <body class="bg-slate-100 min-h-screen w-full flex flex-row font-(family-name:--font-nunito) antialiased">
 
-    <div id="nav"
-        class="sticky top-5 h-[calc(100vh-2.5rem)] backdrop-blur-sm bg-white/50 flex flex-col w-20 p-2 ml-5 my-5 rounded-2xl shadow-md justify-center border-2 border-stone-50">
-        <img class="h-7 w-8 self-center my-2" src="./assets/img/logo.png">
-
-        <div class="flex-1 flex flex-col gap-4 justify-center items-center" id="icons">
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png" ></img>
-            </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
-                onclick="window.location = './register.html'">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/analyse-qr-small.png"></img>
-            </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
-                onclick="window.location = './users.html'">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/userlist.png"></img>
-            </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
-                onclick="window.location = './logs.html'">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/logs.png"></img>
-            </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
-                onclick="logout()">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/exit.png"></img>
-            </div>
-        </div>
-    </div>
-
     <div id="content"
         class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-5 m-5 rounded-2xl shadow-md border-2 border-stone-50">
 
-        <a class="text-xl font-extrabold" id="pagetitle">Accueil</a>
+        <div class="flex flex-1 flex-row gap-4 justify-center items-center">
 
-        <div class="flex flex-1 flex-row gap-4">
+            <div
+                class="backdrop-blur-sm bg-white/50 flex flex-col p-5 m-5 rounded-2xl shadow-md border-2 gap-2 border-stone-50">
 
-            <!-- gauche -->
-            <div class="flex flex-col flex-1 h-full">
-                <div
-                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50">
+                <a class="text-xl font-extrabold" id="pagetitle">Connexion</a>
 
-                    <div class="flex flex-row items-center gap-2 mb-4">
+                <br>
 
-                        <img class="h-3" src="./assets/img/graph.png">
-                        <a class="text-lg font-bold" id="pagetitle">Données</a>
-
-                    </div>
-
-                    <div class="flex flex-1 flex-row gap-2">
-                        <div class="flex flex-row flex-1 bg-green-500 rounded-2xl p-4">
-
-                            <div class="flex flex-row items-center gap-4">
-
-                                <img class="h-10" src="./assets/img/abonnement.png">
-
-                                <div class="flex flex-col">
-                                    <a class="text-3xl font-bold text-white" id="sub_count">0</a>
-                                    <a class="text-sm text-white">Abonnés</a>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="flex flex-row flex-1 bg-sky-500 rounded-2xl p-4">
-
-                            <div class="flex flex-row items-center gap-4">
-
-                                <img class="h-10" src="./assets/img/user.png">
-                                <div class="flex flex-col">
-                                    <a class="text-3xl font-bold text-white" id="user_count">0</a>
-                                    <a class="text-sm text-white">Inscrits</a>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="flex flex-row flex-1 bg-red-500 rounded-2xl p-4">
-
-                            <div class="flex flex-row items-center gap-4">
-
-                                <img class="h-10" src="./assets/img/user.png">
-                                <div class="flex flex-col">
-                                    <a class="text-3xl font-bold text-white" id="uses_count">0</a>
-                                    <a class="text-sm text-white">Entrées (ce mois)</a>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
+                <input type="text" id="email" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
+                    placeholder="e-mail..." required />
+                <input type="text" id="password" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
+                    placeholder="mot de passe..." required />
+                <div id="btnRegister" onclick="login()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                    <img class="h-5" src="./assets/img/verify.png">
+                    <a class="text-white">Connexion</a>
                 </div>
 
-                <div
-                    class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50">
-
-                    <div class="flex flex-row items-center gap-2 mb-4">
-
-                        <img class="h-3" src="./assets/img/graph.png">
-                        <a class="text-lg font-bold" id="pagetitle">Statistiques</a>
-
-                    </div>
-
-                    <canvas class="flex flex-row gap-2 h-full" id="myChart">
-
-
-                    </canvas>
-
-                </div>
-
-                <div
-                    class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50">
-
-                    <div class="flex flex-row justify-start items-center gap-2 h-full">
-
-                        <div class="flex flex-col">
-
-                            <div class="flex flex-row items-center gap-2">
-
-                                <div class="h-3 w-3 bg-red-500 rounded-full" id="connectgauge"></div>
-                                <a class="text-red-800" id="connecttext">Déconnecté</a>
-
-                            </div>
-
-                            <a class="flex flex-row gap-1">Dernier ping arduino: <p id="heartbeat">Connexion...</p></a>
-
-                        </div>
-
-                    </div>
-
-                </div>
             </div>
 
-            <!-- droite -->
-            <div class="flex flex-col flex-1 h-full">
-                <div
-                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50 flex-1">
-
-                    <div class="flex flex-row items-center gap-2">
-                        <img class="h-3" src="./assets/img/graph.png">
-                        <a class="text-lg font-bold" id="pagetitle">Console</a>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto mt-4 max-h-160" id="eventLog">
-                        <!--<div
-                            class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mb-4 rounded-2xl shadow-md border-2 border-stone-50">
-                            test
-                        </div>-->
-                    </div>
-
-                </div>
-            </div>
         </div>
 
     </div>
@@ -181,7 +49,7 @@
 <script>
     const ctx = document.getElementById('myChart');
 
-    function monthParser(data){
+    function monthParser(data) {
         let d = new Date();
         c.data.datasets[0].data[d.getMonth()] = data
         c.update()
@@ -213,7 +81,9 @@
 </script>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="./assets/js/index.js"></script>
+<script>
+    const socket = io();
+</script>
 <script src="./assets/js/authMan.js"></script>
 
 </html>

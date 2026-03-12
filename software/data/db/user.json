@@ -4,7 +4,8 @@
         "hasSubscription": true,
         "email": "celian.alazard@gmail.com",
         "visits": [],
-        "password": "$2b$12$oeay9wuQahquY7wrBnF7HOyZKpVwrpu1nSI5U9yuX.yrv4TmNsyJm",
-        "tagSignature": "E9-CB-7A-E2"
+        "password": "$2b$12$laJ6nlp0YlIvXCoH/Krnte8ns8J/pAMyTOsSh2eBg3Y6BMB70sFHO",
+        "tagSignature": "E9-CB-7A-E2",
+        "isInside":false
     }
 ]

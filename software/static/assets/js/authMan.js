@@ -11,10 +11,9 @@ const connStatus = {
 let currentStatus = connStatus.connecting;
 
 function verifyConnection() {
-    if (!localStorage.getItem("token")){
-        console.log("[Auth] Token invalid !");
-        localStorage.removeItem("token")
-        window.location = "./login.html"
+    if (!localStorage.getItem("token")) {
+        connectCallback(false);
+        currentStatus = connStatus.invalid
         return false;
     }
 
@@ -23,14 +22,59 @@ function verifyConnection() {
     }))
 }
 
-socket.on("AUTH_RES", function (res) {
-    if (res.valid) {
+function connectCallback(success) {
+    if (window.location.toString().includes("login")) {
+        return;
+    }
+
+    if (success) {
+        currentStatus = connStatus.success
         console.log("[Auth] Success connecting");
     } else {
+        currentStatus = connStatus.invalid
         console.log("[Auth] Token invalid !");
         localStorage.removeItem("token")
         window.location = "./login.html"
     }
+}
+
+socket.on("AUTH_RES", function (res) {
+    connectCallback(res.valid)
 })
 
-verifyConnection()
+socket.on("LOGIN_RES", function (res){
+    console.log(res)
+    if (res.status){
+        if (res.token){
+            localStorage.setItem("token", res.token)
+            window.location = "./"
+        }else{
+            console.log(res)
+            alert("Erreur interne (NO_TOKEN_RES)")
+        }
+    }else{
+        console.log("[Auth] invalid password or email")
+        alert("Mot de passe et/ou email invalide.")
+    }
+})
+
+if (!window.location.toString().includes("login")) {
+    verifyConnection()
+}else{
+    if (localStorage.getItem("token")){
+        window.location = "./"
+    }
+    console.log("[Auth] Skip autologging...")
+}
+
+function login(){
+    const email = document.getElementById("email").value
+    const password = document.getElementById("password").value
+
+    socket.emit("LOGIN_REQ", {e:email,p:password})
+}
+
+function logout(){
+    localStorage.removeItem("token")
+    window.location = "./login.html"
+}

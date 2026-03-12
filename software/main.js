@@ -148,7 +148,8 @@ let userDB = [
         email: "",
         visits: [],
         password: "",
-        tagSignature: ""
+        tagSignature: "",
+        isInside:false
     }
 ]
 userDB = []
@@ -332,6 +333,35 @@ io.on('connection', (socket) => {
             console.log(error)
         }
     })
+    socket.on("LOGIN_REQ", async (data)=>{
+        try {
+            let user;
+            console.log(data)
+            userDB.forEach(usr => {
+                if (usr.email == data.e){
+                    user = usr
+                }
+            });
+
+            if (!user.email){
+                socket.emit("LOGIN_RES", {status:false})
+                return;
+            }
+
+            let match = await verifyPassword(data.p, user.password)
+
+            if (match){
+                let token = makeToken(user)
+                socket.emit("LOGIN_RES", {status:true, token:token})
+                return;
+            }else{
+                socket.emit("LOGIN_RES", {status:false})
+                return;
+            }
+        } catch (error) {
+            socket.emit("LOGIN_RES", {status:false})
+        }
+    })
     socket.on('BADGE_ALLOW', (msg) => {
         ard_port.write("0,Celian", (err) => {
             if (err) {
@@ -438,7 +468,7 @@ io.on('connection', (socket) => {
 });
 
 async function gen(){
-    let gent = await makeToken({test:"test"})
+    let gent = await hashPassword("seltest")
     console.log(gent)
     return gent;
 }
