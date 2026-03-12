@@ -183,7 +183,8 @@ function verifyBadge(uid) {
             writeArduino("0," + user.name)
             logConsole(`{"type":"RFID_CALLBACK","user":"${user.name}","access":"accordé", "uid":"${uid}"}`)
             sessionEntries += 1;
-            statDB.entries = statDB.entries + 1
+            let timedate = new Date().getMonth();
+            statDB.entries[timedate] = statDB.entries[timedate] + 1
             io.emit("updateRequest", "")
             fileManager.writeToFile("./data/db/stats.json", JSON.stringify(statDB))
         } else {
@@ -325,10 +326,8 @@ app.get('/test', (req, res) => {
 io.on('connection', (socket) => {
     socket.on("AUTH_REQ", (data) => {
         try {
-            console.log(data)
             if (data.token) {
                 let valid = verifyToken(data.token)
-                console.log(valid)
                 if (valid) {
                     socket.emit("AUTH_RES", { valid: true })
                 } else {
@@ -343,7 +342,6 @@ io.on('connection', (socket) => {
     socket.on("LOGIN_REQ", async (data) => {
         try {
             let user;
-            console.log(data)
             userDB.forEach(usr => {
                 if (usr.email == data.e) {
                     user = usr
@@ -421,7 +419,6 @@ io.on('connection', (socket) => {
                         logFiles.push(path.basename(filename).replace(".log", ""))
                     };
                 };
-                console.log(logFiles)
                 socket.emit("DATA_CALLBACK", { type: "logHistory", data: logFiles })
             } else {
                 socket.emit("INVALID_PRIVILEGES")
@@ -524,7 +521,6 @@ io.on('connection', (socket) => {
 
 async function gen() {
     let gent = await hashPassword("seltest")
-    console.log(gent)
     return gent;
 }
 

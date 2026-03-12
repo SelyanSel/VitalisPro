@@ -97,9 +97,18 @@ socket.on("DATA_CALLBACK", function (data) {
 
         document.getElementById("sub_count").textContent = stats.subscribed
         document.getElementById("user_count").textContent = stats.users
-        document.getElementById("uses_count").textContent = stats.entries
 
-        monthParser(stats.entries)
+        let currentDate = new Date().getMonth()
+        document.getElementById("uses_count").textContent = stats.entries[currentDate]
+        c.data.datasets[0].data[currentDate] = stats.entries[currentDate]
+        let i = 0
+        c.data.datasets[0].data.forEach(dataset => {
+            c.data.datasets[0].data[i] = stats.entries[i]
+            console.log({1:dataset, 2:stats.entries[i]})
+            i++;
+        });
+        c.update()
+        console.log(c.data)
     }
 
 })

@@ -44,6 +44,12 @@ socket.on("DATA_CALLBACK", function (data) {
                 create.setAttribute("class", divClass);
                 create.textContent = new Date(parseInt(timestamp)).toString();
                 document.getElementById("eventLog").prepend(create);
+            }else{
+                let create = document.createElement("div");
+                create.setAttribute("onclick", "show('latest');")
+                create.setAttribute("class", divClass);
+                create.textContent = "Session en cours (latest)";
+                document.getElementById("eventLog").prepend(create);
             }
         });
 
