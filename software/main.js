@@ -138,7 +138,7 @@ const ResponseStatus = {
 
 let statDB = {
     entries: 0,
-    tags: []
+    tagsInside: []
 }
 statDB = JSON.parse(fileManager.readFileContent("./data/db/stats.json"))
 
