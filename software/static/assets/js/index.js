@@ -59,6 +59,13 @@ function addConsoleEvent(eventData) {
             document.getElementById("eventLog").prepend(create);
             return; 
         }
+        if (eventData.data == "REGISTER_SUCCESS"){
+            let create = document.createElement("div");
+            create.setAttribute("class", divClass);
+            create.textContent = `[${eventData.time}]: Badge enregistré avec succès`;
+            document.getElementById("eventLog").prepend(create);
+            return; 
+        }
 
         let create = document.createElement("div");
         create.setAttribute("class", divClass);

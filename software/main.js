@@ -80,6 +80,8 @@ function logConsole(message = "") {
 }
 
 // detection arduino
+// mac rfid / gen : A8:61:0A:AE:77:79
+// mac facial : 90:A2-DA-10-FE-47
 
 let ardPort = 'COM6';
 let isConnected = false;
@@ -399,6 +401,13 @@ io.on('connection', (socket) => {
             socket.emit("INVALID_PRIVILEGES")
             return;
         }
+
+        if (parseToken.privileges[0] != "2"){
+            socket.emit("INVALID_PRIVILEGES")
+            return;
+        }
+
+        // 
 
         if (req.type == "preciseLog") {
             if (parseToken.privileges[0] == 2) {

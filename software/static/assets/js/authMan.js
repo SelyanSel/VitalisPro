@@ -10,6 +10,17 @@ const connStatus = {
 }
 let currentStatus = connStatus.connecting;
 
+// stackoverflow https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-without-using-a-library
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+
 function verifyConnection() {
     if (!localStorage.getItem("token")) {
         connectCallback(false);
@@ -30,6 +41,18 @@ function connectCallback(success) {
     if (success) {
         currentStatus = connStatus.success
         console.log("[Auth] Success connecting");
+
+        let pJwt = parseJwt(localStorage.getItem("token"))
+        console.log(pJwt)
+        
+        if (window.location.toString().includes("client")){
+
+        }else{
+            console.log("[Auth] Invalid web path!")
+            if (pJwt.privileges[0] != "2"){
+                window.location = "./client/"
+            }
+        }
     } else {
         currentStatus = connStatus.invalid
         console.log("[Auth] Token invalid !");

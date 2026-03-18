@@ -5,7 +5,7 @@
 #include <utility/Adafruit_MCP23017.h>
 
 // variables rfid
-#define SS_PIN 10
+#define SS_PIN 8
 #define RST_PIN 9
 #define BUZZ 5
 MFRC522 rfid(SS_PIN, RST_PIN);

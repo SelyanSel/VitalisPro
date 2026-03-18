@@ -1,1 +1,26 @@
-[{"name":"Celian","hasSubscription":true,"email":"celian.alazard@gmail.com","visits":[],"password":"$2b$12$laJ6nlp0YlIvXCoH/Krnte8ns8J/pAMyTOsSh2eBg3Y6BMB70sFHO","tagSignature":"E9-CB-7A-E2","isInside":false,"privileges":[2]},{"name":"-1","hasSubscription":false,"email":"t@gmail.com","visits":[],"password":"-1","tagSignature":"4E-8F-CD-B4","isInside":false,"privileges":[0]}]
+[
+    {
+        "name": "Celian",
+        "hasSubscription": true,
+        "email": "celian.alazard@gmail.com",
+        "visits": [],
+        "password": "$2b$12$laJ6nlp0YlIvXCoH/Krnte8ns8J/pAMyTOsSh2eBg3Y6BMB70sFHO",
+        "tagSignature": "E9-CB-7A-E2",
+        "isInside": false,
+        "privileges": [
+            1
+        ]
+    },
+    {
+        "name": "-1",
+        "hasSubscription": false,
+        "email": "t@gmail.com",
+        "visits": [],
+        "password": "-1",
+        "tagSignature": "7E-88-D2-B4",
+        "isInside": false,
+        "privileges": [
+            0
+        ]
+    }
+]
