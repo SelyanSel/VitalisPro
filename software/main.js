@@ -12,15 +12,15 @@ const path = require("node:path")
 const env = require('dotenv')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const net = require('net')
+let arduinoSocket = null;
+const clients = {};
 
 // config
 
 env.config();
 
 // arduino
-
-const { SerialPort } = require('serialport');
-const { ReadlineParser } = require("@serialport/parser-readline")
 
 const jwt_secret = process.env.CLE_SECRETE
 
@@ -83,54 +83,7 @@ function logConsole(message = "") {
 // mac rfid / gen : A8:61:0A:AE:77:79
 // mac facial : 90:A2-DA-10-FE-47
 
-let ardPort = 'COM6';
 let isConnected = false;
-
-SerialPort.list().then(function (ports) {
-    ports.forEach(function (port) {
-        if (port.friendlyName.includes("Arduino Uno")) {
-            ardPort = port.path;
-        }
-    })
-})
-
-let ard_port;
-
-try {
-    ard_port = new SerialPort({
-        path: ardPort,
-        baudRate: 9600
-    })
-    logConsole(`Connecté au port ${ardPort}.`)
-} catch (error) {
-    logConsole("Arduino non trouvé.")
-    setTimeout(() => {
-        retryConnect()
-    }, 1500);
-}
-
-function retryConnect() {
-    try {
-        SerialPort.list().then(function (ports) {
-            ports.forEach(function (port) {
-                if (port.friendlyName.includes("Arduino Uno")) {
-                    ardPort = port.path;
-
-                    ard_port = new SerialPort({
-                        path: ardPort,
-                        baudRate: 9600
-                    })
-                    return;
-                }
-            })
-        })
-    } catch (error) {
-        logConsole("Arduino non trouvé.")
-        setTimeout(() => {
-            retryConnect()
-        }, 1500);
-    }
-}
 
 const ResponseStatus = {
     ALLOW_ACCESS: 1,
@@ -160,18 +113,13 @@ let userDB = [
 userDB = []
 userDB = JSON.parse(fileManager.readFileContent("./data/db/user.json"))
 
-const parser = ard_port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-
 function writeArduino(msg) {
-    ard_port.write(msg, (err) => {
-        if (err) {
-            logConsole(err.toString())
-            logConsole("WriteError :: " + msg)
-            return console.log('Erreur lors de l\'envoi : ', err.message);
-        } else {
-            logConsole("WriteSuccess :: " + msg)
-        }
-    });
+    if (arduinoSocket) {
+        arduinoSocket.write(msg + "\n"); // Ajout du saut de ligne pour readStringUntil
+        logConsole("SCK_WRITE () :: " + msg);
+    } else {
+        logConsole("Erreur : Arduino non connecté en Ethernet");
+    }
 }
 
 function verifyBadge(uid) {
@@ -237,69 +185,41 @@ function parseJwt(token) {
     return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
 
-parser.on('data', (data) => {
-    let json;
-    try {
-        json = JSON.parse(data)
-    } catch (error) {
-        ard_port.write("-1", (err) => {
-            if (err) {
-                return console.log('Erreur lors de l\'envoi : ', err.message);
-            } else {
-                logConsole("RFID_CALLBACK_SCANOK")
-            }
-        });
-    }
+const tcpServer = net.createServer((socket) => {
+    arduinoSocket = socket;
+    logConsole(`New listener : ${socket.remoteAddress}`);
 
-    try {
-
-        if (json.type == "ALIVE_HEARTBEAT") {
-            lastPing = new Date().toLocaleTimeString();
-            io.emit("heartbeat", { "time": `${new Date().toLocaleTimeString()}` })
+    socket.on('data', (data) => {
+        let dataStr = data.toString().trim();
+        let json;
+        try {
+            json = JSON.parse(dataStr);
+        } catch (e) {
+            // manage parsing err / fallback
             return;
         }
 
-        logConsole(data)
-
-        if (json.type == "RFID_SCAN") {
-            ard_port.write("0", (err) => {
-                if (err) {
-                    return console.log('Erreur lors de l\'envoi : ', err.message);
-                } else {
-                    logConsole("RFID_CALLBACK_SCANOK")
-                }
-            });
-
-            setTimeout(() => {
-                verifyBadge(json.uid)
-            }, 1000);
-        } else if (json.type == "RFID_REGISTER_SCAN") {
-            let foundUser = false;
-
-            userDB.forEach(usr => {
-                if (usr.tagSignature == json.uid) {
-                    foundUser = true;
-                }
-            });
-
-            if (!foundUser) {
-                setTimeout(() => {
-                    io.emit("REGISTER_SCANNED", { uid: json.uid })
-                }, 500);
-            } else {
-                setTimeout(() => {
-                    io.emit("REGISTER_ERR", {
-                        fatal: true,
-                        title: "Erreur fatale",
-                        message: "Le badge est déjà enregistré."
-                    })
-                }, 500);
-            }
+        if (json.type == "ALIVE_HEARTBEAT") {
+            lastPing = new Date().toLocaleTimeString();
+            io.emit("heartbeat", { "time": lastPing });
+            return;
         }
 
-    } catch (error) {
-        console.log(error)
-    }
+        if (json.type == "RFID_SCAN") {
+            writeArduino("0\n");
+            verifyBadge(json.uid)
+        } else if (json.type == "RFID_REGISTER_SCAN") {
+            let foundUser = userDB.some(usr => usr.tagSignature == json.uid);
+            if (!foundUser) {
+                io.emit("REGISTER_SCANNED", { uid: json.uid });
+            } else {
+                io.emit("REGISTER_ERR", { fatal: true, title: "Erreur", message: "Badge déjà enregistré." });
+            }
+        }
+    });
+
+    socket.on('error', (err) => logConsole("Socket Error: " + err.message));
+    socket.on('end', () => { logConsole("Arduino déconnecté."); arduinoSocket = null; });
 });
 
 // debug
@@ -534,6 +454,10 @@ async function gen() {
 }
 
 gen()
+
+tcpServer.listen(9961, '0.0.0.0', () => {
+    console.log("-- TCP Arduino Backend operational (9961)");
+});
 
 app.use(express.static('static'))
 server.listen(port, () => {
