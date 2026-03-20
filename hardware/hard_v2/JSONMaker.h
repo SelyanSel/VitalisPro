@@ -41,7 +41,7 @@ public:
     buffer += "}";
     if (Encrypt) {
       for (int i = 0; i < buffer.length(); i++) {
-        buffer[i] = buffer[i] ^ (encryptKey & 0xFF);  // On utilise l'octet de poids faible de l'int
+        buffer[i] = buffer[i] ^ (encryptKey & 0xFF);
       }
     }
   }

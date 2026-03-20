@@ -47,6 +47,7 @@ let logData = [
 ]
 let lastPing = "Patientez...";
 let sessionEntries = 0;
+let ardEncryptKey = 0;
 
 function beginLogging() {
     logData = [];
@@ -122,6 +123,10 @@ function writeArduino(msg) {
     }
 }
 
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 function verifyBadge(uid) {
     let user = userDB.find(user => {
         return user.tagSignature == uid
@@ -185,6 +190,16 @@ function parseJwt(token) {
     return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 }
 
+// stackoverflow
+function xorCipher(data, key) {
+    let result = "";
+    const k = key & 0xFF;
+    for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ k);
+    }
+    return result;
+}
+
 const tcpServer = net.createServer((socket) => {
     arduinoSocket = socket;
     logConsole(`New listener : ${socket.remoteAddress}`);
@@ -196,13 +211,26 @@ const tcpServer = net.createServer((socket) => {
             json = JSON.parse(dataStr);
         } catch (e) {
             // manage parsing err / fallback
-            return;
+            // attempt xor decypher
+            try {
+                json = JSON.parse(xorCipher(dataStr, ardEncryptKey))
+            } catch (error) {
+                if (data != undefined){
+                    console.log(data)
+                }
+                return; // unknown
+            }
         }
+        console.log(json)
 
         if (json.type == "ALIVE_HEARTBEAT") {
             lastPing = new Date().toLocaleTimeString();
             io.emit("heartbeat", { "time": lastPing });
             return;
+        }
+
+        if (json.type == "INIT"){
+            writeArduino("SUCCESS," + ardEncryptKey)
         }
 
         if (json.type == "RFID_SCAN") {
@@ -316,13 +344,12 @@ io.on('connection', (socket) => {
         let parseToken = parseJwt(req.token)
 
         // admin privileges
-
         if (!parseToken.privileges) {
             socket.emit("INVALID_PRIVILEGES")
             return;
         }
 
-        if (parseToken.privileges[0] != "2"){
+        if (parseToken.privileges[0] != "2") {
             socket.emit("INVALID_PRIVILEGES")
             return;
         }
@@ -389,23 +416,13 @@ io.on('connection', (socket) => {
         }
     })
     socket.on('INIT_REGISTER', (req) => {
-        ard_port.write("-1", (err) => {
-            if (err) {
-                return console.log('Erreur lors de l\'envoi : ', err.message);
-            } else {
-                logConsole("INIT_REGISTER")
-                socket.emit("REGISTER_READY")
-            }
-        });
+        writeArduino("-1")
+        logConsole("INIT_REGISTER")
+        socket.emit("REGISTER_READY")
     })
     socket.on("REGISTER_CANCEL", () => {
-        ard_port.write("-5", (err) => {
-            if (err) {
-                return console.log('Erreur lors de l\'envoi : ', err.message);
-            } else {
-                logConsole("REGISTER_CANCEL")
-            }
-        });
+        writeArduino("-5")
+        logConsole("REGISTER_CANCEL")
     })
     socket.on("REGISTER_BEGIN", (packet) => {
         let foundUser = false;
@@ -430,14 +447,8 @@ io.on('connection', (socket) => {
             userDB.push(newUser)
             fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
             socket.emit("REGISTER_SUCCESS")
-            ard_port.write("3", (err) => {
-                if (err) {
-                    return console.log('Erreur lors de l\'envoi : ', err.message);
-                } else {
-                    logConsole("REGISTER_SUCCESS")
-                    socket.emit("REGISTER_SUCCESS")
-                }
-            });
+            writeArduino("-5")
+            socket.emit("REGISTER_SUCCESS")
         } else {
             socket.emit("REGISTER_ERR", {
                 fatal: true,
@@ -457,6 +468,8 @@ gen()
 
 tcpServer.listen(9961, '0.0.0.0', () => {
     console.log("-- TCP Arduino Backend operational (9961)");
+    ardEncryptKey = Math.round(getRandomArbitrary(5, 500))
+    console.log("-- Encryption key set (" + ardEncryptKey + ")");
 });
 
 app.use(express.static('static'))

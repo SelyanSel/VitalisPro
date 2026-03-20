@@ -24,10 +24,10 @@
 
 // Ethernet Setup
 byte mac[] = { 0xA8, 0x61, 0x0A, 0xAE, 0x77, 0x79 };  // This is defined on the back of the arduino.
-IPAddress arduinoIP(192, 168, 1, 40); // Defined arduino IP
-String arduinoIPstr = "192.168.1.40"; // it's easier ngl (i'm lazy)
-IPAddress serverIP(192, 168, 1, 50);  // Defined server address
-int serverPort = 9961;                // ARBITRARY : should implement a discover feature?
+IPAddress arduinoIP(192, 168, 1, 40);                 // Defined arduino IP
+String arduinoIPstr = "192.168.1.40";                 // it's easier ngl (i'm lazy)
+IPAddress serverIP(192, 168, 1, 50);                  // Defined server address
+int serverPort = 9961;                                // ARBITRARY : should implement a discover feature?
 EthernetClient client;
 
 // rfid variables
@@ -47,7 +47,7 @@ bool OKCallback = false;
 bool registerMode = false;
 bool regMem = false;
 int callbackTimer = 0;
-String arduinoID = "VT_A_Portique-01";
+String arduinoID = "VT_A_Portique v2";
 JSONMaker json;
 int aliveT = 0;
 bool syncState = true;
@@ -182,12 +182,30 @@ void loop() {
       return;  // prevent client void
     }
 
+    if (client.available()) {
+      String res = client.readStringUntil('\n');
+      res.trim();
+      int vRes = res.indexOf(',');
+      if (vRes != -1) {
+
+        String serverStatusString = res.substring(0, vRes);
+        int servStatus = serverStatusString.toInt();
+
+        String eKey = res.substring(vRes + 1);
+        json.defineKey(eKey.toInt());
+
+        resetUI();
+        toneBuzz(50);
+        syncState = false;
+      }
+    }
+
     json.begin();
     json.add("type", "INIT");
     json.add("ip", arduinoIPstr);
-    json.end();
+    json.end(false);
 
-    pushServer(json.get(false));
+    pushServer(json.get());
   }
 
   if (switchStatus != switchSaveVal) {
