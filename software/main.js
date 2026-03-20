@@ -230,7 +230,7 @@ const tcpServer = net.createServer((socket) => {
         }
 
         if (json.type == "INIT"){
-            writeArduino("SUCCESS," + ardEncryptKey)
+            writeArduino("0," + ardEncryptKey)
         }
 
         if (json.type == "RFID_SCAN") {

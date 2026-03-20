@@ -10,7 +10,7 @@ class JSONMaker {
 private:
   String buffer;
   bool firstItem;
-  int encryptKey;
+  int encryptKey = -1;
 
 public:
   void defineKey(int encryptionKey) {
@@ -40,6 +40,7 @@ public:
   void end(bool Encrypt = true) {
     buffer += "}";
     if (Encrypt) {
+      if (encryptKey == -1) { return; }; // prevents empty encryption
       for (int i = 0; i < buffer.length(); i++) {
         buffer[i] = buffer[i] ^ (encryptKey & 0xFF);
       }

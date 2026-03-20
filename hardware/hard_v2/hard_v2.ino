@@ -194,15 +194,21 @@ void loop() {
         String eKey = res.substring(vRes + 1);
         json.defineKey(eKey.toInt());
 
+        if (servStatus != 0){
+          return;
+        }
+
         resetUI();
         toneBuzz(50);
         syncState = false;
+        return;
       }
     }
 
     json.begin();
     json.add("type", "INIT");
     json.add("ip", arduinoIPstr);
+    json.add("pid", arduinoID);
     json.end(false);
 
     pushServer(json.get());
