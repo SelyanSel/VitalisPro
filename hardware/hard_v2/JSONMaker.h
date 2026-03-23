@@ -1,5 +1,5 @@
 // -----
-// Lightweight JSON Library
+// Lightweight JSON Library w Encryption
 // 2026 selyansel
 // -----
 // Made for the VitalisPro project.
