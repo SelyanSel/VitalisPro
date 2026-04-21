@@ -53,11 +53,13 @@ int aliveT = 0;
 bool syncState = true;
 
 void setup() {
+  Serial.begin(9600);
   pinMode(BUZZ, OUTPUT);
   pinMode(SWITCH, INPUT_PULLUP);
   // rfid setup
   SPI.begin();
   rfid.PCD_Init();
+  rfid.PCD_DumpVersionToSerial();
 
   // ethernet setup
   Ethernet.begin(mac, arduinoIP);
@@ -73,7 +75,6 @@ void setup() {
   lcd.print(arduinoID);
 
   lcd.setBacklight(0x7);
-  Serial.begin(9600);
 
   int switchStatus = digitalRead(SWITCH);
   switchSaveVal = digitalRead(SWITCH);
@@ -334,6 +335,7 @@ void loop() {
         // 2 = badge inconnu
         // 3 = register ok
         // 4 = quitter salle
+        // 5 = salle pleine
         // -5 = register annulé
 
         // -1 = erreur serveur
@@ -363,6 +365,25 @@ void loop() {
           lcd.print("A bientot,");
           lcd.setCursor(0, 1);
           lcd.print(user);
+
+          if (switchStatus == HIGH) {
+            toneBuzz(500);
+          }
+
+          delay(3000);
+
+          resetUI();
+
+          waitForServerCallback = false;
+          OKCallback = false;
+          return;
+        }
+
+        if (servStatus == 5) {
+          lcd.clear();
+          lcd.print("Acces interdit:");
+          lcd.setCursor(0, 1);
+          lcd.print("Salle pleine!");
 
           if (switchStatus == HIGH) {
             toneBuzz(500);

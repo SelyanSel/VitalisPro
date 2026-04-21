@@ -7,8 +7,8 @@
     <title>Vitalis Pro - Espace Membre</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="./assets/css/main.css">
-    <link rel="stylesheet" href="./assets/css/cssfix.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/cssfix.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -22,23 +22,31 @@
             <div
                 class="backdrop-blur-sm bg-white/50 flex flex-col p-5 m-5 rounded-2xl shadow-md border-2 gap-2 border-stone-50">
 
-                <a class="text-xl font-extrabold" id="pagetitle">Connexion</a>
+                <a class="text-xl font-extrabold" id="pagetitle">Nouveau compte</a>
+
+                <a class="text-gray-500">Bienvenue ! Créez votre compte: entrez vos informations pour commencer.</a>
 
                 <br>
 
                 <input type="text" id="email" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
                             backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
                     placeholder="e-mail..." required />
+                <input type="text" id="name" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
+                    placeholder="prénom..." required />
                 <input type="text" id="password" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
                             backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
                     placeholder="mot de passe..." required />
-                <div id="btnLogin" onclick="login()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                <input type="text" id="vPassword" class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-2xl shadow-md border-2 border-stone-50"
+                    placeholder="confirmez le mot de passe..." required />
+                <div id="btnLogin" onclick="newRegister()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
                                    items-center align-middle">
-                    <img class="h-5" src="./assets/img/verify.png">
-                    <a class="text-white">Connexion</a>
+                    <img class="h-5" src="../assets/img/verify.png">
+                    <a class="text-white">Valider</a>
                 </div>
                 <br>
-                <a class="text-gray-700">Nouveau compte? <a href="./client/accountwizard.html" class="text-sky-600 underline">Cliquez ici</a></a>
+                <a class="text-gray-700">Déjà un compte? <a href="../login.html" class="text-sky-600 underline">Cliquez ici</a></a>
 
             </div>
 
@@ -48,44 +56,10 @@
 
 </body>
 
-<script>
-    const ctx = document.getElementById('myChart');
-
-    function monthParser(data) {
-        let d = new Date();
-        c.data.datasets[0].data[d.getMonth()] = data
-        c.update()
-    }
-
-    let c = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
-            ],
-            datasets: [{
-                label: 'Entrées',
-                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    suggestedMin: 0,
-                    suggestedMax: 10
-                }
-            }
-        }
-    });
-</script>
-
-<script src="/socket.io/socket.io.js"></script>
+<script src="../socket.io/socket.io.js"></script>
 <script>
     const socket = io();
 </script>
-<script src="./assets/js/authMan.js"></script>
+<script src="../assets/js/authMan.js"></script>
 
 </html>

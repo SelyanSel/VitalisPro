@@ -1,14 +1,1 @@
-[
-    {
-        "name": "Celian",
-        "hasSubscription": true,
-        "email": "celian.alazard@gmail.com",
-        "visits": [],
-        "password": "$2b$12$laJ6nlp0YlIvXCoH/Krnte8ns8J/pAMyTOsSh2eBg3Y6BMB70sFHO",
-        "tagSignature": "E9-CB-7A-E2",
-        "isInside": false,
-        "privileges": [
-            2
-        ]
-    }
-]
+[{"name":"Celian","hasSubscription":true,"email":"celian.alazard@gmail.com","visits":[{"timestamp":"21/4/2026 2:22:24"}],"password":"$2b$12$laJ6nlp0YlIvXCoH/Krnte8ns8J/pAMyTOsSh2eBg3Y6BMB70sFHO","tagSignature":"E9-CB-7A-E2","isInside":false,"privileges":[2]},{"name":"Sel","hasSubscription":true,"email":"seltest@gmail.com","visits":[{"timestamp":"2/3/2026 2:5:12"},{"timestamp":"21/3/2026 2:6:11"},{"timestamp":"21/4/2026 2:6:41"},{"timestamp":"21/4/2026 2:6:52"},{"timestamp":"21/4/2026 2:22:20"}],"password":"$2b$12$atYaoHX10RO/ypIPo1pjs.P0u.1OmMmp7YOXxeybebZJTUCfYR98i","tagSignature":"EA-D9-1D-33","isInside":false,"privileges":[0]},{"name":"Greg","hasSubscription":false,"email":"gregory@gmail.com","visits":[{"timestamp":"21/4/2026 2:19:59"},{"timestamp":"21/4/2026 2:20:16"},{"timestamp":"21/4/2026 2:20:37"}],"password":"$2b$12$wbhqDrTauBh.HWP8gWZHV.0fdlIA/0paK0x.4O.QU9s3u9vWLAJD6","tagSignature":"99-B8-BB-48","isInside":false,"privileges":[0]}]

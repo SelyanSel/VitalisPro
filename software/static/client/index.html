@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis Pro - Espace Membre</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/cssfix.css">
+    <script src="../assets/js/chart.js"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen w-full flex flex-col font-(family-name:--font-nunito) antialiased">
+
+    <div id="content"
+        class="backdrop-blur-sm bg-white/50 flex flex-1 flex-col p-5 m-5 rounded-2xl shadow-md border-2 border-stone-50">
+
+        <div
+            class="backdrop-blur-sm bg-white/50 flex flex-col gap-5 p-5 mt-5 rounded-2xl shadow-md border-2 border-stone-50">
+
+            <a class="text-xl font-extrabold" id="pagetitle">Mon compte</a>
+
+            <div class="flex flex-row gap-5">
+                <img src="../assets/img/dummyuser.png" class="h-16 rounded-full">
+                <div class="flex flex-col">
+                    <a class="text-xl font-semibold" id="name">Utilisateur</a>
+                    <a class="text-sm" id="email">test@gmail.com</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div
+            class="backdrop-blur-sm bg-white/50 flex flex-col gap-2.5 p-5 mt-5 rounded-2xl shadow-md border-2 border-stone-50">
+
+            <a class="text-xl font-extrabold" id="pagetitle">Mon abonnement</a>
+
+            <div class="flex flex-col align-middle">
+                <div class="flex flex-row gap-1.5 items-center">
+                    <div class="h-3 w-3 bg-red-500 rounded-full" id="sub_gauge"></div>
+                    <a class="text-red-800" id="sub_status">Vérification...</a>
+                </div>
+
+                <div class="flex" id="renewbox" hidden>
+                    <br>
+                    <div id="btnLogin" onclick="renewSubscription()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                        <img class="h-5" src="../assets/img/abonnement.png">
+                        <a class="text-white">Renouveler</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div
+            class="backdrop-blur-sm bg-white/50 flex flex-col p-5 mt-5 gap-2.5 rounded-2xl shadow-md border-2 border-stone-50">
+
+            <a class="text-xl font-extrabold" id="pagetitle">Mes 5 dernières visites</a>
+
+            <div class="flex flex-col align-middle gap-5" id="visit_list">
+                <!--
+                <div
+                    class="backdrop-blur-sm bg-white/50 flex flex-col gap-2.5 p-5 rounded-2xl shadow-md border-2 border-stone-50">
+
+                    <a class="text-xl font-extrabold self-center">21/04/2026 16:47:00</a>
+
+                </div>
+                -->
+
+                <a class="text-gray-700 self-center">-- Fin de la liste --</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="nav"
+        class="sticky bottom-5 w-[calc(100vw-2.5rem)] backdrop-blur-sm bg-white/50 flex flex-row h-20 p-2 ml-5 my-5 mt-0 rounded-2xl shadow-md justify-center border-2 border-stone-50">
+
+        <div class="flex-1 flex flex-row gap-4 justify-center items-center" id="icons">
+            <div
+                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center">
+                <img class="flex flex-col h-5 w-5 justify-center" src="../assets/img/acceuil.png"></img>
+            </div>
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+                onclick="logout()">
+                <img class="flex flex-col h-5 w-5 justify-center" src="../assets/img/exit.png"></img>
+            </div>
+        </div>
+    </div>
+
+    <div hidden id="modal-success" class="absolute backdrop-blur-xs w-dvw h-dvh flex items-center">
+        <div class="flex flex-1 flex-row gap-4 justify-center items-center">
+
+            <div
+                class="backdrop-blur-sm bg-white flex flex-col p-5 m-5 rounded-2xl shadow-md border-2 gap-2 border-stone-50">
+
+                <a class="text-xl font-extrabold" id="modaltitle">Renouvellement</a>
+
+                <a class="text-gray-500" id="modaltext">Votre abonnement a été renouvelé.</a>
+
+                <div id="btnLogin" onclick="closeValidate()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                    <img class="h-5" src="../assets/img/verify.png">
+                    <a class="text-white">Valider</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+<script src="../socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+<script>
+    const socket = io();
+</script>
+<script src="../assets/js/authMan.js"></script>
+<script src="../assets/js/client.js"></script>
+
+</html>

@@ -120,6 +120,7 @@ socket.on("DATA_CALLBACK", function (data) {
         let currentDate = new Date().getMonth()
         document.getElementById("uses_count").textContent = stats.entries[currentDate]
         c.data.datasets[0].data[currentDate] = stats.entries[currentDate]
+        document.getElementById("prs_inside").textContent = `${stats.nbInside} / ${stats.maxInside}`
         let i = 0
         c.data.datasets[0].data.forEach(dataset => {
             c.data.datasets[0].data[i] = stats.entries[i]

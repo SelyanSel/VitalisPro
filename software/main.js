@@ -27,6 +27,14 @@ const jwt_secret = process.env.CLE_SECRETE
 
 const fileManager = require("./modules/fileManager");
 
+// serv config
+
+let serverConfig = {
+    version: "",
+    capacity: 0
+}
+serverConfig = JSON.parse(fileManager.readFileContent("./data/server.json"))
+
 // logging
 
 const ConsoleColors = {
@@ -93,7 +101,15 @@ const ResponseStatus = {
 
 let statDB = {
     entries: 0,
-    tagsInside: []
+    tagsInside: [],
+    nbInside: 0,
+    refusedEntries: [
+        {
+            tag: "",
+            timestamp: "",
+            reason: "Salle pleine."
+        }
+    ]
 }
 statDB = JSON.parse(fileManager.readFileContent("./data/db/stats.json"))
 
@@ -129,22 +145,59 @@ function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+// https://stackoverflow.com/questions/9792927/javascript-array-search-and-remove-string
+// ça me clc j'en ai marre
+function arrayRemove(arr, what) {
+    var found = arr.indexOf(what);
+
+    while (found !== -1) {
+        arr.splice(found, 1);
+        found = arr.indexOf(what);
+    }
+}
+
 function verifyBadge(uid) {
     let user = userDB.find(user => {
         return user.tagSignature == uid
     })
 
     if (user) {
-        if (user.isInside){
-            logConsole("FOUND_USER :: " + user.name)
+        logConsole("FOUND_USER :: " + user.name)
+        if (user.isInside) {
             writeArduino("4," + user.name, clients["ARD_PortiqueRFID"])
-            userDB[user].isInside = false;
+            userDB.find((fuser) => fuser.email == user.email).isInside = false;
+            if (statDB.tagsInside.includes(user.tagSignature)) {
+                arrayRemove(statDB.tagsInside, user.tagSignature)
+            }
             fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
+            fileManager.writeToFile("./data/db/stats.json", JSON.stringify(statDB))
+            io.emit("updateRequest", "")
             return;
         }
-        logConsole("FOUND_USER :: " + user.name)
+        if (statDB.tagsInside.length + 1 > serverConfig.capacity) {
+            const tdate = new Date()
+            writeArduino("5," + user.name, clients["ARD_PortiqueRFID"])
+            statDB.refusedEntries.push({ tag: uid, timestamp: tdate.getTime, reason: "MAX_CAPACITY_REACHED" })
+            io.emit("updateRequest", "")
+            logConsole(`{"type":"RFID_CALLBACK","user":"${user.name}","access":"refusé", "uid":"${uid}"}`)
+            return;
+        }
         if (user.hasSubscription) {
-            userDB[user].isInside = true;
+            userDB.find((fuser) => fuser.email == user.email).isInside = true;
+            if (userDB.find((fuser) => fuser.email == user.email).visits.length + 1 > 5){
+                userDB.find((fuser) => fuser.email == user.email).visits.shift()
+            }
+            let d = new Date();
+            userDB.forEach((usr)=>{
+                if (usr.email == user.email){
+                    usr.visits.push({timestamp:`${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()} ${d.getDay()}:${d.getMinutes()}:${d.getSeconds()}`})
+                }
+            })
+            
+            console.log(`${d.getDay()}/${d.getMonth()}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`)
+            if (!statDB.tagsInside.includes(user.tagSignature)) {
+                statDB.tagsInside.push(user.tagSignature)
+            }
             fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
             writeArduino("0," + user.name, clients["ARD_PortiqueRFID"])
             logConsole(`{"type":"RFID_CALLBACK","user":"${user.name}","access":"accordé", "uid":"${uid}"}`)
@@ -269,7 +322,7 @@ const tcpServer = net.createServer((socket) => {
         if (socket.id == "ARD_PortiqueRFID") {
             arduinoSocket = null;
         }
-        io.emit("disconnect", {"service":socket.id})
+        io.emit("disconnect", { "service": socket.id })
     });
 });
 
@@ -340,6 +393,44 @@ io.on('connection', (socket) => {
             socket.emit("LOGIN_RES", { status: false })
         }
     })
+    socket.on("REGISTER_REQ", async (data) => {
+        try {
+            let user;
+            userDB.forEach(usr => {
+                if (usr.email == data.e) {
+                    user = usr
+                }
+            });
+            try {
+                if (user) {
+                    if (user.name != "-1") {
+                        socket.emit("REGISTER_ANS", { status: false, reason: "Vérifiez l'addresse email, puis réessayez." })
+                        return;
+                    }
+                } else {
+                    socket.emit("REGISTER_ANS", { status: false, reason: "Vérifiez l'addresse email, puis réessayez." })
+                    return;
+                }
+            } catch (error) {
+                socket.emit("REGISTER_ANS", { status: false, reason: "Vérifiez l'addresse email, puis réessayez." })
+                return;
+            }
+
+            let encryptPass = await hashPassword(data.password)
+
+            userDB.find((fuser) => fuser.email == user.email).password = encryptPass;
+            userDB.find((fuser) => fuser.email == user.email).name = data.name;
+
+            fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
+
+            socket.emit("REGISTER_ANS", { status: true })
+
+        } catch (error) {
+            socket.emit("REGISTER_ANS", { status: false, reason: "Erreur interne. Veuillez réessayer." })
+            logConsole("Erreur enregistrement : REGISTER_ERR")
+            logConsole(error)
+        }
+    })
     socket.on('BADGE_ALLOW', (msg) => {
         ard_port.write("0,Celian", (err) => {
             if (err) {
@@ -370,6 +461,16 @@ io.on('connection', (socket) => {
         if (!parseToken.privileges) {
             socket.emit("INVALID_PRIVILEGES")
             return;
+        }
+
+        if (req.type == "SUB_DETAILS") {
+            let hasSub = false;
+            userDB.forEach((user) => {
+                if (user.email == parseToken.email) {
+                    hasSub = user.hasSubscription
+                }
+            });
+            socket.emit("SUB_CALLBACK", { sub: hasSub, visits:userDB.find((fuser) => fuser.email == parseToken.email).visits })
         }
 
         if (parseToken.privileges[0] != "2") {
@@ -430,7 +531,9 @@ io.on('connection', (socket) => {
                     data: {
                         subscribed: sub,
                         users: userDB.length,
-                        entries: statDB.entries
+                        entries: statDB.entries,
+                        nbInside: statDB.tagsInside.length,
+                        maxInside: serverConfig.capacity
                     }
                 })
             } else {
@@ -478,6 +581,22 @@ io.on('connection', (socket) => {
                 title: "Erreur fatale",
                 message: "L'email est déjà utilisé par un autre utilisateur."
             })
+        }
+    })
+    socket.on("RENEW_SUB", async (data) => {
+        try {
+            let valid = verifyToken(data.token)
+
+            if (valid){
+                let parsed = parseJwt(data.token)
+                
+                userDB.find((fuser) => fuser.email == parsed.email).hasSubscription = true;
+                fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
+
+                socket.emit("RENEW_ANS", {status:"Votre abonnement a été renouvelé avec succès !", code:0})
+            }
+        } catch (error) {
+            socket.emit("RENEW_ANS", {status:"Une erreur interne est survenue. Veuillez réessayer.", code:-1})
         }
     })
 });
