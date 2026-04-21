@@ -14,7 +14,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const net = require('net')
 let arduinoSocket = null;
-const clients = {};
 
 // config
 
@@ -114,9 +113,12 @@ let userDB = [
 userDB = []
 userDB = JSON.parse(fileManager.readFileContent("./data/db/user.json"))
 
-function writeArduino(msg) {
-    if (arduinoSocket) {
-        arduinoSocket.write(msg + "\n"); // Ajout du saut de ligne pour readStringUntil
+// clients
+let clients = {};
+
+function writeArduino(msg, target = arduinoSocket) {
+    if (target) {
+        target.write(msg + "\n"); // Ajout du saut de ligne pour readStringUntil
         logConsole("SCK_WRITE () :: " + msg);
     } else {
         logConsole("Erreur : Arduino non connecté en Ethernet");
@@ -133,9 +135,18 @@ function verifyBadge(uid) {
     })
 
     if (user) {
+        if (user.isInside){
+            logConsole("FOUND_USER :: " + user.name)
+            writeArduino("4," + user.name, clients["ARD_PortiqueRFID"])
+            userDB[user].isInside = false;
+            fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
+            return;
+        }
         logConsole("FOUND_USER :: " + user.name)
         if (user.hasSubscription) {
-            writeArduino("0," + user.name)
+            userDB[user].isInside = true;
+            fileManager.writeToFile("./data/db/user.json", JSON.stringify(userDB))
+            writeArduino("0," + user.name, clients["ARD_PortiqueRFID"])
             logConsole(`{"type":"RFID_CALLBACK","user":"${user.name}","access":"accordé", "uid":"${uid}"}`)
             sessionEntries += 1;
             let timedate = new Date().getMonth();
@@ -143,13 +154,13 @@ function verifyBadge(uid) {
             io.emit("updateRequest", "")
             fileManager.writeToFile("./data/db/stats.json", JSON.stringify(statDB))
         } else {
-            writeArduino("1," + user.name)
+            writeArduino("1," + user.name, clients["ARD_PortiqueRFID"])
             logConsole(`{"type":"RFID_CALLBACK","user":"${user.name}","access":"refusé (expiré)", "uid":"${uid}"}`)
             io.emit("updateRequest", "")
         }
     } else {
         logConsole("USER_NOT_FOUND")
-        writeArduino("2,null")
+        writeArduino("2,null", clients["ARD_PortiqueRFID"])
         logConsole(`{"type":"RFID_CALLBACK","user":"Inconnu","access":"refusé", "uid":"${uid}"}`)
         io.emit("updateRequest", "")
     }
@@ -200,8 +211,11 @@ function xorCipher(data, key) {
     return result;
 }
 
+app.get("/clients", (req, res) => {
+    res.status(200).send(clients)
+})
+
 const tcpServer = net.createServer((socket) => {
-    arduinoSocket = socket;
     logConsole(`New listener : ${socket.remoteAddress}`);
 
     socket.on('data', (data) => {
@@ -215,22 +229,25 @@ const tcpServer = net.createServer((socket) => {
             try {
                 json = JSON.parse(xorCipher(dataStr, ardEncryptKey))
             } catch (error) {
-                if (data != undefined){
-                    console.log(data)
+                if (data != undefined) {
                 }
                 return; // unknown
             }
         }
-        console.log(json)
 
         if (json.type == "ALIVE_HEARTBEAT") {
             lastPing = new Date().toLocaleTimeString();
-            io.emit("heartbeat", { "time": lastPing });
+            io.emit("heartbeat", { "time": lastPing, "service": socket.id });
             return;
         }
 
-        if (json.type == "INIT"){
-            writeArduino("0," + ardEncryptKey)
+        if (json.type == "INIT") {
+            socket.id = json.pid
+            clients[json.pid] = socket
+            if (json.pid == "ARD_PortiqueRFID") {
+                arduinoSocket = socket
+            }
+            writeArduino("0," + ardEncryptKey, socket)
         }
 
         if (json.type == "RFID_SCAN") {
@@ -247,7 +264,13 @@ const tcpServer = net.createServer((socket) => {
     });
 
     socket.on('error', (err) => logConsole("Socket Error: " + err.message));
-    socket.on('end', () => { logConsole("Arduino déconnecté."); arduinoSocket = null; });
+    socket.on('end', () => {
+        logConsole("Arduino déconnecté.");
+        if (socket.id == "ARD_PortiqueRFID") {
+            arduinoSocket = null;
+        }
+        io.emit("disconnect", {"service":socket.id})
+    });
 });
 
 // debug
@@ -468,7 +491,7 @@ gen()
 
 tcpServer.listen(9961, '0.0.0.0', () => {
     console.log("-- TCP Arduino Backend operational (9961)");
-    ardEncryptKey = Math.round(getRandomArbitrary(5, 500))
+    ardEncryptKey = Math.round(getRandomArbitrary(1, 100))
     console.log("-- Encryption key set (" + ardEncryptKey + ")");
 });
 

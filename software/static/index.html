@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="./assets/css/main.css">
     <link rel="stylesheet" href="./assets/css/cssfix.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./assets/js/chart.js"></script>
 </head>
 
 <body class="bg-slate-100 min-h-screen w-full flex flex-row font-(family-name:--font-nunito) antialiased">
@@ -21,25 +21,21 @@
         <div class="flex-1 flex flex-col gap-4 justify-center items-center" id="icons">
             <div
                 class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center">
-                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png" ></img>
+                <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/acceuil.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './register.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/analyse-qr-small.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './users.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/userlist.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="window.location = './logs.html'">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/logs.png"></img>
             </div>
-            <div
-                class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
+            <div class="backdrop-blur-sm bg-white/50 flex flex-col cursor-pointer p-4 h-max w-max rounded-full shadow-md justify-center items-center"
                 onclick="logout()">
                 <img class="flex flex-col h-5 w-5 justify-center" src="./assets/img/exit.png"></img>
             </div>
@@ -118,7 +114,7 @@
 
                     <div class="flex flex-row items-center gap-2 mb-4">
 
-                        <img class="h-3" src="./assets/img/graph.png">
+                        <img class="h-3" src="./assets/img/chart.png">
                         <a class="text-lg font-bold" id="pagetitle">Statistiques</a>
 
                     </div>
@@ -135,6 +131,36 @@
 
                     <div class="flex flex-row justify-start items-center gap-2 h-full">
 
+                        <div class="flex flex-row flex-1 bg-yellow-500 rounded-2xl p-4">
+
+                            <div class="flex flex-row items-center gap-4">
+
+                                <img class="h-10" src="./assets/img/interieur.png">
+
+                                <div class="flex flex-col">
+                                    <a class="text-3xl font-bold text-white" id="sub_count">0</a>
+                                    <a class="text-sm text-white">Personnes dans la salle (actuel)</a>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="flex flex-row flex-1 bg-yellow-500 rounded-2xl p-4">
+
+                            <div class="flex flex-row items-center gap-4">
+
+                                <img class="h-10" src="./assets/img/user.png">
+                                <div class="flex flex-col">
+                                    <a class="text-3xl font-bold text-white" id="user_count">0</a>
+                                    <a class="text-sm text-white">Sorties dans la salle (ce jour)</a>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!--
                         <div class="flex flex-col">
 
                             <div class="flex flex-row items-center gap-2">
@@ -146,7 +172,7 @@
 
                             <a class="flex flex-row gap-1">Dernier ping arduino: <p id="heartbeat">Connexion...</p></a>
 
-                        </div>
+                        </div>-->
 
                     </div>
 
@@ -154,20 +180,70 @@
             </div>
 
             <!-- droite -->
-            <div class="flex flex-col flex-1 h-full">
+            <div class="flex flex-col flex-1 h-full min-h-0">
                 <div
-                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50 flex-1">
+                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50 flex-1 min-h-0">
 
                     <div class="flex flex-row items-center gap-2">
-                        <img class="h-3" src="./assets/img/graph.png">
-                        <a class="text-lg font-bold" id="pagetitle">Console (filtrée)</a>
+                        <img class="h-3" src="./assets/img/terminal.png">
+                        <a class="text-lg font-bold" id="pagetitle">Console (tronquée)</a>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto mt-4 max-h-160" id="eventLog">
+                    <div class="flex-1 overflow-y-auto mt-4" id="eventLog">
                         <!--<div
                             class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mb-4 rounded-2xl shadow-md border-2 border-stone-50">
                             test
                         </div>-->
+                    </div>
+
+                </div>
+
+                <div
+                    class="backdrop-blur-sm bg-white/50 flex flex-col p-4 mt-4 rounded-2xl shadow-md border-2 border-stone-50 flex-1 min-h-0 gap-4">
+
+                    <div class="flex flex-row items-center gap-2">
+                        <img class="h-3" src="./assets/img/arduinos.png">
+                        <a class="text-lg font-bold" id="pagetitle">Connexions</a>
+                    </div>
+
+                    <div class="flex flex-row bg-white/50 p-4 rounded-2xl shadow-md border-2 border-stone-50">
+
+                        <div class="flex flex-row items-center gap-4">
+
+                            <img class="h-10" src="./assets/img/capture.png">
+
+                            <div class="flex flex-col">
+                                <a class="text-3xl font-bold">ARD_Recon</a>
+                                <div class="flex flex-row items-center gap-2">
+
+                                    <div class="h-3 w-3 bg-red-500 rounded-full" id="ARD_Recon_gauge"></div>
+                                    <a class="text-red-800" id="ARD_Recon_status">Vérification...</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-row bg-white/50 p-4 rounded-2xl shadow-md border-2 border-stone-50">
+
+                        <div class="flex flex-row items-center gap-4">
+
+                            <img class="h-10" src="./assets/img/scanrfid.png">
+
+                            <div class="flex flex-col">
+                                <a class="text-3xl font-bold" id="sub_count">ARD_PortiqueRFID</a>
+                                <div class="flex flex-row items-center gap-2">
+
+                                    <div class="h-3 w-3 bg-red-500 rounded-full" id="ARD_PortiqueRFID_gauge"></div>
+                                    <a class="text-red-800" id="ARD_PortiqueRFID_status">Vérification...</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -181,7 +257,7 @@
 <script>
     const ctx = document.getElementById('myChart');
 
-    function monthParser(data){
+    function monthParser(data) {
         let d = new Date();
         c.data.datasets[0].data[d.getMonth()] = data
         c.update()

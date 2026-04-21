@@ -2,17 +2,25 @@ var socket = io();
 
 let badge_id = "";
 
-function switchConnectStatus(text, status) {
+function switchConnectStatus(text, status, service) {
     if (status) {
-        document.getElementById("connectgauge").setAttribute("class", "h-3 w-3 bg-green-500 rounded-full")
-        document.getElementById("connecttext").setAttribute("class", "text-green-800")
-        document.getElementById("connecttext").textContent = text
+        document.getElementById(service + "_gauge").setAttribute("class", "h-3 w-3 bg-green-500 rounded-full")
+        document.getElementById(service + "_status").setAttribute("class", "text-green-800")
+        document.getElementById(service + "_status").textContent = text
     } else {
-        document.getElementById("connectgauge").setAttribute("class", "h-3 w-3 bg-red-500 rounded-full")
-        document.getElementById("connecttext").setAttribute("class", "text-red-800")
-        document.getElementById("connecttext").textContent = text
+        document.getElementById(service + "_gauge").setAttribute("class", "h-3 w-3 bg-red-500 rounded-full")
+        document.getElementById(service + "_status").setAttribute("class", "text-red-800")
+        document.getElementById(service + "_status").textContent = text
     }
 }
+
+setInterval(() => {
+    if (document.getElementById("eventLog").childElementCount > 5){
+        while (document.getElementById("eventLog").childElementCount > 5){
+            document.getElementById("eventLog").lastChild.remove();
+        }
+    }
+}, 100);
 
 function addConsoleEvent(eventData) {
     let divClass = "backdrop-blur-sm bg-white/50 flex flex-col p-4 mb-4 rounded-2xl shadow-md border-2 border-stone-50";
@@ -21,7 +29,10 @@ function addConsoleEvent(eventData) {
         "RFID_CALLBACK_SCANOK",
         "FOUND_USER",
         "WriteSuccess",
-        "USER_NOT_FOUND"
+        "USER_NOT_FOUND",
+        "SCK_WRITE",
+        "Socket Error",
+        "New listener"
     ]
 
     try {
@@ -75,8 +86,13 @@ function addConsoleEvent(eventData) {
 }
 
 socket.on('heartbeat', function (data) {
-    document.getElementById("heartbeat").textContent = data.time;
-    switchConnectStatus("Connecté à l'Arduino", true)
+    console.log(data)
+    switchConnectStatus("En ligne", true, data.service)
+})
+
+socket.on('disconnect', function (data) {
+    console.log(data)
+    switchConnectStatus("Hors ligne", false, data.service)
 })
 
 socket.on("consoleEvent", function (ev) {
@@ -94,10 +110,6 @@ socket.on("DATA_CALLBACK", function (data) {
         data.data.forEach(ev => {
             addConsoleEvent(ev)
         });
-    }
-    if (data.type == "lastPing") {
-        document.getElementById("heartbeat").textContent = data.data;
-        switchConnectStatus("Connecté à l'Arduino", true)
     }
     if (data.type == "stats") {
         let stats = data.data

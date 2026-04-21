@@ -47,7 +47,7 @@ bool OKCallback = false;
 bool registerMode = false;
 bool regMem = false;
 int callbackTimer = 0;
-String arduinoID = "VT_A_Portique v2";
+String arduinoID = "ARD_PortiqueRFID";
 JSONMaker json;
 int aliveT = 0;
 bool syncState = true;
@@ -176,13 +176,35 @@ void registerRFID() {
 void loop() {
   int switchStatus = digitalRead(SWITCH);
 
+  if (!client.connected()) {
+    if (!syncState) {
+      Serial.println("Lost connection !");
+      client.connect(serverIP, serverPort);
+      syncState = true;
+
+      toneBuzz(20);
+      delay(40);
+      toneBuzz(20);
+
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Sync en cours...");
+      delay(1);
+      lcd.setCursor(0, 1);
+      lcd.print(arduinoID);
+      return;  // reset
+    }
+  }
+
   if (syncState) {
     if (!client.connected()) {
       client.connect(serverIP, serverPort);
+      Serial.println("CONNECT_REQ");
       return;  // prevent client void
     }
 
     if (client.available()) {
+      Serial.println("----");
       String res = client.readStringUntil('\n');
       res.trim();
       int vRes = res.indexOf(',');
@@ -191,16 +213,20 @@ void loop() {
         String serverStatusString = res.substring(0, vRes);
         int servStatus = serverStatusString.toInt();
 
-        String eKey = res.substring(vRes + 1);
-        json.defineKey(eKey.toInt());
+        int eKey = res.substring(vRes + 1).toInt();
+        json.defineKey(eKey);
+        Serial.println("Connect success //");
+        Serial.print("ENCRYPT_KEY: ");
+        Serial.println(eKey);
 
-        if (servStatus != 0){
+        if (servStatus != 0) {
           return;
         }
 
         resetUI();
         toneBuzz(50);
         syncState = false;
+        Serial.println("----");
         return;
       }
     }
@@ -210,6 +236,7 @@ void loop() {
     json.add("ip", arduinoIPstr);
     json.add("pid", arduinoID);
     json.end(false);
+    Serial.println("Push init request...");
 
     pushServer(json.get());
   }
@@ -246,25 +273,6 @@ void loop() {
           return;
         }
       } else {
-        callbackTimer += 1;
-        delay(1);
-
-        if (callbackTimer > 1000) {
-          callbackTimer = 0;
-
-          lcd.clear();
-          lcd.print("Erreur serveur");
-          lcd.setCursor(0, 1);
-          lcd.print("ERR_UNREACHABLE");
-
-          delay(5000);
-
-          resetUI();
-
-          waitForServerCallback = false;
-          OKCallback = false;
-          return;
-        }
         return;
       }
     }
@@ -325,6 +333,7 @@ void loop() {
         // 1 = abonnement expiré
         // 2 = badge inconnu
         // 3 = register ok
+        // 4 = quitter salle
         // -5 = register annulé
 
         // -1 = erreur serveur
@@ -349,9 +358,28 @@ void loop() {
           return;
         }
 
+        if (servStatus == 4) {
+          lcd.clear();
+          lcd.print("A bientot,");
+          lcd.setCursor(0, 1);
+          lcd.print(user);
+
+          if (switchStatus == HIGH) {
+            toneBuzz(500);
+          }
+
+          delay(3000);
+
+          resetUI();
+
+          waitForServerCallback = false;
+          OKCallback = false;
+          return;
+        }
+
         if (servStatus == 0) {
           lcd.clear();
-          lcd.print("Bienvenue");
+          lcd.print("Bienvenue,");
           lcd.setCursor(0, 1);
           lcd.print(user);
 
@@ -429,7 +457,7 @@ void loop() {
 
   // chercher carte
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) {
-    if (aliveT < 100) {
+    if (aliveT < 50) {
       aliveT++;
     } else {
       aliveT = 0;
@@ -507,6 +535,7 @@ void resetUI() {
 
 // Quick function to trigger a buzzer tonality (c'est plus simple)
 void toneBuzz(int ms) {
+  if (switchSaveVal != HIGH) return;
   digitalWrite(BUZZ, HIGH);
   delay(ms);
   digitalWrite(BUZZ, LOW);
