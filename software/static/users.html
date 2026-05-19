@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitalis Pro - Espace Membre</title>
+    <title>Vitalis Pro - Espace Administrateur</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="./assets/css/main.css">
@@ -50,7 +50,8 @@
             <a class="text-xl font-medium" id="date"></a>
         </div>
 
-        <div class="backdrop-blur-sm bg-gray-900 flex flex-row p-2.5 mb-4 rounded-2xl shadow-md border-2 border-gray-800">
+        <div
+            class="backdrop-blur-sm bg-gray-900 flex flex-row p-2.5 mb-2 rounded-2xl shadow-md border-2 border-gray-800">
             <div class="bg-sky-950 p-2.5 m-2.5 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3 w-max
                                    items-center align-middle">
                 <img class="h-5" src="./assets/img/ajouter.png">
@@ -63,16 +64,54 @@
             </div>
         </div>
 
-
-
-        <div class="flex flex-1 flex-col gap-4">
-
-
-
+        <div
+            class="backdrop-blur-sm bg-gray-900 flex flex-col flex-1 p-2.5 mb-2 rounded-2xl shadow-md border-2 border-gray-800">
+            <div
+                class="backdrop-blur-sm bg-gray-700 flex flex-row p-2.5 mb-2 rounded-2xl shadow-md border-2 border-gray-800">
+                <input type="text" id="email"
+                    class="bg-neutral-secondary-medium border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand w-full px-3 py-2.5 placeholder:text-body
+                            backdrop-blur-sm flex flex-1 flex-col rounded-lg shadow-md border-2 bg-white border-stone-50"
+                    placeholder="Recherche..." required />
+            </div>
         </div>
 
     </div>
 
+    <div id="modal-user" class="absolute backdrop-blur-xs w-dvw h-dvh flex items-center">
+        <div class="flex flex-1 flex-row gap-4 justify-center items-center">
+
+            <div
+                class="backdrop-blur-sm bg-white flex flex-col p-5 m-5 rounded-2xl shadow-md border-2 gap-2 border-stone-50">
+
+                <div class="flex flex-row gap-2.5 items-center mb-2.5">
+                    <img src="./assets/img/dummyuser.png" class="h-8 w-8 rounded-full">
+                    <a class="text-xl font-extrabold" id="modaltitle">{user}</a>
+                </div>
+
+                <a class="text-gray-800 font-extrabold" id="modaltext">Status de l'utilisateur:</a>
+                <div class="flex flex-row gap-1.5 items-center">
+                    <div class="h-3 w-3 bg-red-500 rounded-full" id="sub_gauge"></div>
+                    <a class="text-red-800" id="sub_status">Abonnement inactif</a>
+                </div>
+                <div class="flex flex-row gap-1.5 items-center">
+                    <div class="h-3 w-3 bg-red-500 rounded-full" id="sub_gauge"></div>
+                    <a class="text-red-800" id="sub_status">Inscription non terminée</a>
+                </div>  
+
+                <a class="text-gray-800 font-extrabold" id="modaltext">Informations:</a>
+                
+                <div id="btnLogin" onclick="closeValidate()" class="bg-sky-950 p-2.5 mt-4 rounded-2xl cursor-pointer shadow-md border-2 border-sky-900 flex flex-row gap-3
+                                   items-center align-middle">
+                    <img class="h-5" src="../assets/img/verify.png">
+                    <a class="text-white">Valider</a>
+                </div>
+
+                <a class="text-gray-500">Status de l'utilisateur:</a>
+
+            </div>
+
+        </div>
+    </div>
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
